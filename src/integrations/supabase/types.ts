@@ -14,7 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      call_log: {
+        Row: {
+          created_at: string
+          id: number
+          lead_id: number
+          notes: string | null
+          outcome: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          lead_id: number
+          notes?: string | null
+          outcome: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          lead_id?: number
+          notes?: string | null
+          outcome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_log_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          call_count: number
+          city: string | null
+          company_name: string
+          created_at: string
+          id: number
+          industry: string | null
+          last_called_at: string | null
+          notes: string | null
+          phone: string | null
+          postcode: string | null
+          rating: number | null
+          review_count: number | null
+          source: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          call_count?: number
+          city?: string | null
+          company_name: string
+          created_at?: string
+          id?: number
+          industry?: string | null
+          last_called_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          rating?: number | null
+          review_count?: number | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          call_count?: number
+          city?: string | null
+          company_name?: string
+          created_at?: string
+          id?: number
+          industry?: string | null
+          last_called_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          rating?: number | null
+          review_count?: number | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +111,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      lead_status:
+        | "new"
+        | "called"
+        | "interested"
+        | "demo_booked"
+        | "closed"
+        | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +244,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      lead_status: [
+        "new",
+        "called",
+        "interested",
+        "demo_booked",
+        "closed",
+        "dead",
+      ],
+    },
   },
 } as const
