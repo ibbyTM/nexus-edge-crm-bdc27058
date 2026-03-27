@@ -296,7 +296,7 @@ export default function Import() {
       {!loading && actors.length > 0 && (
         <div className="actor-grid">
           {actors.map((actor) => (
-            <ActorCard key={actor.id} actor={actor} onRun={handleRun} onImport={handleImport} importing={importing} />
+            <ActorCard key={actor.id} actor={actor} onRun={handleRun} onImport={handleImport} importing={importing} showRunForm={showRunForm} onShowForm={(id: string) => { setShowRunForm(id); setSearchTerm(''); setMaxResults(50); }} onCancelForm={() => setShowRunForm(null)} onSubmitForm={handleRunWithForm} searchTerm={searchTerm} setSearchTerm={setSearchTerm} maxResults={maxResults} setMaxResults={setMaxResults} />
           ))}
         </div>
       )}
