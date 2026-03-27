@@ -1,39 +1,43 @@
 
 
-# Fix Mobile Portrait View (393px)
+# Fix Dashboard Mobile — No Horizontal Scrolling
 
-## Issues at 393px portrait
+## Problem
+The Kanban board has 6 columns with `min-width: 140px` each (840px total), causing horizontal overflow on a 390px screen. The user shouldn't need to scroll sideways on the dashboard.
 
-1. **Leads table still shows 5 columns** (checkbox, company, phone, city, industry) — too cramped at 393px
-2. **Filter bar selects have inline `style={{ width: 'auto' }}`** which overrides the mobile CSS `width: 100%`
-3. **Keyboard hints row** — `.kbd` is hidden but the parent div still occupies vertical space
-4. **Status breakdown** at 3 columns is tight; 2 columns would be better at this width
-5. **Leads page "Call Next" button** in header may wrap awkwardly
-6. **Panel info values** `max-width: 240px` is too wide for 393px screen
+## Solution
+Replace the horizontal kanban with a compact vertical summary on mobile, and ensure nothing else overflows.
 
-## Changes
+### Changes
 
-### 1. `src/index.css` — Tighten the 768px media query
+### 1. `src/index.css` — Mobile media query updates
 
-- Hide City and Industry columns too (only show checkbox, company, phone, status, actions) — use specific nth-child selectors instead of `n+6`
-- Add `.keyboard-hints { display: none }` class for mobile
-- Status breakdown grid: `repeat(2, 1fr)` instead of 3
-- Reduce card and stat padding
-- Panel info value: reduce max-width to 55%
-- Filter bar: ensure selects are full width by adding `!important` to override inline styles
-- Reduce page-header margin
-- Make action buttons (Call Next) smaller on mobile
+**Kanban on mobile**: Switch from horizontal flex layout to a vertical grid. Instead of showing full kanban columns with cards, display a compact 2-column grid of status counts (similar to the status breakdown but inline in the pipeline section). Hide individual kanban cards on mobile — just show column headers with counts stacked in a grid.
 
-### 2. `src/pages/Leads.tsx` — Minor markup fixes
+```css
+/* Inside @media (max-width: 768px) */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  overflow-x: hidden;
+}
+.kanban-col {
+  min-width: unset;
+  flex-shrink: unset;
+}
+.kanban-cards {
+  display: none;  /* Hide card lists on mobile */
+}
+```
 
-- Add `className="keyboard-hints"` to the keyboard hints div so it can be hidden via CSS
-- Remove inline `style={{ width: 'auto' }}` from filter selects (let CSS handle it)
+This turns the pipeline section into a quick-glance 2×3 grid of statuses with counts — no scrolling needed, and it mirrors the status breakdown style.
 
-### 3. `src/components/LeadDetailPanel.tsx` — No changes needed
+**Also add**: `overflow-x: hidden` on `.page` to prevent any stray overflow.
 
-Panel already goes to `100vw` on mobile via CSS.
+### 2. `src/components/KanbanBoard.tsx` — No changes needed
+The CSS-only approach hides the cards and restructures the layout without touching JSX.
 
 ## Files modified
-- `src/index.css` — ~15 lines updated in the mobile media query
-- `src/pages/Leads.tsx` — 2 small changes (className on hints div, remove inline widths)
+- `src/index.css` — ~10 lines updated in the mobile media query
 
