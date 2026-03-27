@@ -144,6 +144,21 @@ export default function Import() {
 
   useEffect(() => { if (token) loadActors(); else setLoading(false); }, [token]);
 
+  const handleRunWithForm = async (actorId: string) => {
+    const input = actorId === GOOGLE_MAPS_ACTOR
+      ? { searchStringsArray: [searchTerm], maxCrawledPlacesPerSearch: maxResults }
+      : {};
+    setShowRunForm(null);
+    setRunMsg(null);
+    try {
+      const run = await api.apify.run(actorId, input);
+      setRunMsg({ type: 'success', text: `Run started (ID: ${run.id}). Status: ${run.status}` });
+      setTimeout(loadActors, 3000);
+    } catch (e: any) {
+      setRunMsg({ type: 'error', text: e.message });
+    }
+  };
+
   const handleRun = async (actorId: string) => {
     setRunMsg(null);
     try {
