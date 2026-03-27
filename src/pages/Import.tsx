@@ -18,9 +18,13 @@ const DEFAULT_ACTOR = {
   stats: { totalRuns: null, lastRunStartedAt: null },
 };
 
-function ActorCard({ actor, onRun, onImport, importing }: any) {
+const GOOGLE_MAPS_ACTOR = 'compass/crawler-google-places';
+
+function ActorCard({ actor, onRun, onImport, importing, showRunForm, onShowForm, onCancelForm, onSubmitForm, searchTerm, setSearchTerm, maxResults, setMaxResults }: any) {
   const isRunning = actor.stats?.lastRunStatus === 'RUNNING' ||
     (actor.lastRun && actor.lastRun.status === 'RUNNING');
+  const isGoogleMaps = actor.id === GOOGLE_MAPS_ACTOR;
+  const formOpen = showRunForm === actor.id;
 
   return (
     <div className={`actor-card${isRunning ? ' actor-card-running' : ''}`}>
@@ -52,8 +56,46 @@ function ActorCard({ actor, onRun, onImport, importing }: any) {
         Builds: <strong>{actor.stats?.totalBuilds ?? '—'}</strong>
       </div>
 
+      {formOpen && (
+        <div style={{ marginBottom: 12, padding: 12, borderRadius: 8, background: 'var(--bg-2, hsl(var(--muted)))', border: '1px solid hsl(var(--border))' }}>
+          <div style={{ marginBottom: 8 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Search term</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e: any) => setSearchTerm(e.target.value)}
+              placeholder="HVAC companies in Denver"
+              style={{ width: '100%', padding: '6px 10px', fontSize: 13, borderRadius: 6, border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
+            />
+          </div>
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Max results</label>
+            <input
+              type="number"
+              value={maxResults}
+              onChange={(e: any) => setMaxResults(Number(e.target.value))}
+              min={1}
+              max={500}
+              style={{ width: 100, padding: '6px 10px', fontSize: 13, borderRadius: 6, border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-secondary btn-sm" onClick={() => onSubmitForm(actor.id)} disabled={!searchTerm.trim()}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Start Run
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={onCancelForm}>Cancel</button>
+          </div>
+        </div>
+      )}
+
       <div className="actor-actions">
-        <button className="btn btn-secondary btn-sm" onClick={() => onRun(actor.id)} disabled={isRunning} title="Trigger a new run with default input">
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={() => isGoogleMaps ? onShowForm(actor.id) : onRun(actor.id)}
+          disabled={isRunning || formOpen}
+          title={isGoogleMaps ? "Configure and run" : "Trigger a new run with default input"}
+        >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           Run Actor
         </button>
