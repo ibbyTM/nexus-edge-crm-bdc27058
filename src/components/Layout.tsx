@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import SettingsModal from './SettingsModal';
 
 const nav = [
