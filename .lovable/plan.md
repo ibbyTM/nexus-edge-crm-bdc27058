@@ -1,57 +1,39 @@
 
 
-# Mobile-Friendly Nexus Edge CRM
+# Fix Mobile Portrait View (393px)
 
-## Problem
-The app has no mobile responsiveness. On a 393px screen:
-- The 248px sidebar eats 63% of the width, leaving ~145px for content
-- The leads table is unusable (10 columns, no horizontal scroll affordance)
-- The lead detail panel is 440px wide (wider than the screen)
-- Dashboard stat grids and kanban overflow
-- Filter bar dropdowns stack poorly
-- No way to collapse the sidebar
+## Issues at 393px portrait
 
-## Approach
-Keep the existing dark, professional aesthetic. No Tailwind refactoring — all changes stay in the existing plain CSS system. Add a collapsible sidebar on mobile with a hamburger toggle, and targeted `@media` queries for small screens.
+1. **Leads table still shows 5 columns** (checkbox, company, phone, city, industry) — too cramped at 393px
+2. **Filter bar selects have inline `style={{ width: 'auto' }}`** which overrides the mobile CSS `width: 100%`
+3. **Keyboard hints row** — `.kbd` is hidden but the parent div still occupies vertical space
+4. **Status breakdown** at 3 columns is tight; 2 columns would be better at this width
+5. **Leads page "Call Next" button** in header may wrap awkwardly
+6. **Panel info values** `max-width: 240px` is too wide for 393px screen
 
 ## Changes
 
-### 1. Layout.tsx — Collapsible mobile sidebar
-- Add a hamburger menu button visible only on mobile (top-left)
-- Sidebar becomes an overlay drawer on screens < 768px
-- Tapping a nav link auto-closes the sidebar
-- Add a backdrop overlay when sidebar is open
+### 1. `src/index.css` — Tighten the 768px media query
 
-### 2. index.css — Mobile media queries
-Add a `@media (max-width: 768px)` block covering:
+- Hide City and Industry columns too (only show checkbox, company, phone, status, actions) — use specific nth-child selectors instead of `n+6`
+- Add `.keyboard-hints { display: none }` class for mobile
+- Status breakdown grid: `repeat(2, 1fr)` instead of 3
+- Reduce card and stat padding
+- Panel info value: reduce max-width to 55%
+- Filter bar: ensure selects are full width by adding `!important` to override inline styles
+- Reduce page-header margin
+- Make action buttons (Call Next) smaller on mobile
 
-**Layout:**
-- Sidebar: `position: fixed`, `transform: translateX(-100%)` by default, slides in when open
-- Main content: full width, no sidebar offset
-- Page padding: reduce from 28px 32px to 16px
+### 2. `src/pages/Leads.tsx` — Minor markup fixes
 
-**Dashboard:**
-- Stat grid: 2 columns (already has this at 1200px, add for smaller)
-- Status breakdown grid: 3 columns instead of 6
-- Kanban: horizontal scroll stays, reduce min-width per column
+- Add `className="keyboard-hints"` to the keyboard hints div so it can be hidden via CSS
+- Remove inline `style={{ width: 'auto' }}` from filter selects (let CSS handle it)
 
-**Leads page:**
-- Filter bar: stack vertically, search input full-width
-- Hide keyboard shortcuts hint on mobile
-- Table: ensure horizontal scroll works, hide less important columns (Rating, Last Called, Calls) via CSS
-- Bulk action bar: wrap properly
+### 3. `src/components/LeadDetailPanel.tsx` — No changes needed
 
-**Lead detail panel:**
-- Panel width: 100vw instead of 440px (full-screen takeover)
-
-**Import page:**
-- Actor grid: single column
-
-**Modal:**
-- Already has `max-width: 96vw` — good
-
-### 3. Dashboard.tsx — Minor tweak
-- Status breakdown grid: add a CSS class instead of inline `gridTemplateColumns` so media query can override it
+Panel already goes to `100vw` on mobile via CSS.
 
 ## Files modified
-- `src/components/Layout.tsx` — hamburger toggle, sidebar state, backdrop, auto-close on nav
+- `src/index.css` — ~15 lines updated in the mobile media query
+- `src/pages/Leads.tsx` — 2 small changes (className on hints div, remove inline widths)
+
