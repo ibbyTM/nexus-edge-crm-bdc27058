@@ -52,7 +52,10 @@ Deno.serve(async (req) => {
 
     // POST /leads/import
     if (req.method === "POST" && pathParts[0] === "import") {
-      const { leads: raw } = await req.json();
+      console.log("Import endpoint hit");
+      const body = await req.json();
+      const raw = body.leads;
+      console.log("Received leads count:", Array.isArray(raw) ? raw.length : "not array");
       if (!Array.isArray(raw) || raw.length === 0)
         return json({ error: "No leads provided" }, 400);
 
@@ -91,10 +94,12 @@ Deno.serve(async (req) => {
 
       // Filter out existing phones in one query
       if (seenPhones.size > 0) {
-        const { data: existing } = await supabase
+        console.log("Checking existing phones:", seenPhones.size);
+        const { data: existing, error: selErr } = await supabase
           .from("leads")
           .select("phone")
           .in("phone", Array.from(seenPhones));
+        if (selErr) console.error("Select error:", selErr.message);
         if (existing) {
           const existingPhones = new Set(existing.map((e: any) => e.phone));
           const before = rows.length;
@@ -105,17 +110,19 @@ Deno.serve(async (req) => {
         }
       }
 
+      console.log("Rows to insert:", rows.length, "Skipped:", skipped);
       if (rows.length === 0) return json({ imported: 0, skipped, total: raw.length });
 
       // Batch insert in chunks of 100
       let imported = 0;
       for (let i = 0; i < rows.length; i += 100) {
         const chunk = rows.slice(i, i + 100);
-        const { error } = await supabase.from("leads").insert(chunk);
-        if (!error) imported += chunk.length;
-        else skipped += chunk.length;
+        const { error: insErr } = await supabase.from("leads").insert(chunk);
+        if (!insErr) imported += chunk.length;
+        else { console.error("Insert error:", insErr.message); skipped += chunk.length; }
       }
 
+      console.log("Import done:", imported, "imported,", skipped, "skipped");
       return json({ imported, skipped, total: raw.length });
     }
 
