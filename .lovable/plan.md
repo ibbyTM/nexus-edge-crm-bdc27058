@@ -1,26 +1,36 @@
 
 
-# Add Default Google Maps Scraper Card + Fix API Query
+# Add Search Form for Google Maps Scraper
 
-## Changes
+## What changes
 
-### 1. `supabase/functions/apify/index.ts`
-Change the actors list endpoint from `/acts?limit=50&my=1` to `/acts?limit=50` (remove `&my=1` filter).
+### `src/pages/Import.tsx`
 
-### 2. `src/pages/Import.tsx`
-After fetching actors in `loadActors`, merge in a hardcoded default actor if not already present:
+**1. Add state for the run form:**
+- `showRunForm`: tracks which actor ID has the form open (or `null`)
+- `searchTerm`: string for the search query
+- `maxResults`: number, default 50
 
-```ts
-const DEFAULT_ACTOR = {
-  id: "compass/crawler-google-places",
-  name: "Google Maps Scraper",
-  stats: { totalRuns: null, lastRunStartedAt: null },
-};
-```
+**2. Modify `ActorCard` to accept `onShowForm` prop:**
+- For the Google Maps Scraper (`compass/crawler-google-places`), the "Run Actor" button calls `onShowForm(actor.id)` instead of `onRun(actor.id)`.
+- For all other actors, behavior stays the same (direct `onRun`).
 
-After `setActors(list || [])`, check if the default actor exists in the list by ID — if not, append it. Also show the actor grid when actors exist (the default always ensures at least one).
+**3. Add inline form below the actor card (or inside it):**
+When `showRunForm === actor.id` and it's the Google Maps actor, render a small form with:
+- Text input: "Search term" with placeholder `"HVAC companies in Denver"`
+- Number input: "Max results" defaulting to `50`
+- "Start Run" button and "Cancel" button
+
+**4. Update `handleRun`:**
+- When called for `compass/crawler-google-places`, pass the structured input:
+  ```json
+  {
+    "searchStringsArray": ["<searchTerm>"],
+    "maxCrawledPlacesPerSearch": <maxResults>
+  }
+  ```
+- For other actors, keep passing `{}`.
 
 ## Files modified
-- `supabase/functions/apify/index.ts` — 1 line changed
-- `src/pages/Import.tsx` — ~8 lines added
+- `src/pages/Import.tsx` — ~40 lines added
 
