@@ -1,36 +1,29 @@
 
 
-# Add Search Form for Google Maps Scraper
+# Fix "Failed to fetch" on Lead Import
 
-## What changes
+## Problem
+The import sends the entire Apify response (huge objects with images, reviews, opening hours, etc.) to the `leads/import` edge function, which then processes each lead **one-by-one** with individual SELECT + INSERT queries. This causes the edge function to timeout for larger batches.
 
-### `src/pages/Import.tsx`
+## Solution
 
-**1. Add state for the run form:**
-- `showRunForm`: tracks which actor ID has the form open (or `null`)
-- `searchTerm`: string for the search query
-- `maxResults`: number, default 50
+### 1. `src/pages/Import.tsx` — Trim payload before sending
+Before calling `api.leads.import(items)`, map items to only the fields the import endpoint actually uses. This dramatically reduces request size.
 
-**2. Modify `ActorCard` to accept `onShowForm` prop:**
-- For the Google Maps Scraper (`compass/crawler-google-places`), the "Run Actor" button calls `onShowForm(actor.id)` instead of `onRun(actor.id)`.
-- For all other actors, behavior stays the same (direct `onRun`).
+```ts
+const trimmed = items.map((i: any) => ({
+  title: i.title, phone: i.phone || i.phoneUnformatted,
+  website: i.website || i.url, city: i.city, address: i.address,
+  categoryName: i.categoryName, rating: i.totalScore,
+  reviewsCount: i.reviewsCount,
+}));
+await api.leads.import(trimmed);
+```
 
-**3. Add inline form below the actor card (or inside it):**
-When `showRunForm === actor.id` and it's the Google Maps actor, render a small form with:
-- Text input: "Search term" with placeholder `"HVAC companies in Denver"`
-- Number input: "Max results" defaulting to `50`
-- "Start Run" button and "Cancel" button
-
-**4. Update `handleRun`:**
-- When called for `compass/crawler-google-places`, pass the structured input:
-  ```json
-  {
-    "searchStringsArray": ["<searchTerm>"],
-    "maxCrawledPlacesPerSearch": <maxResults>
-  }
-  ```
-- For other actors, keep passing `{}`.
+### 2. `supabase/functions/leads/index.ts` — Batch insert with upsert
+Replace the one-by-one loop with a single batch insert, using an `ON CONFLICT` approach or filtering duplicates in one query upfront, to avoid N+1 database calls.
 
 ## Files modified
-- `src/pages/Import.tsx` — ~40 lines added
+- `src/pages/Import.tsx` — trim items before import call (~5 lines)
+- `supabase/functions/leads/index.ts` — refactor import to batch insert (~15 lines changed)
 
