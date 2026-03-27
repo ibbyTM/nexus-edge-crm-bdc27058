@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
 
     // GET /apify/actors
     if (req.method === "GET" && pathParts.length === 1 && pathParts[0] === "actors") {
-      const data = await apifyFetch(token, "/acts?limit=50&my=1");
+      const data = await apifyFetch(token, "/acts?limit=50");
       return json(data.data?.items || []);
     }
 

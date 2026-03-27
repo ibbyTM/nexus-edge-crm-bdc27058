@@ -85,7 +85,11 @@ export default function Import() {
     setError(null);
     try {
       const list = await api.apify.actors();
-      setActors(list || []);
+      const merged = list || [];
+      if (!merged.find((a: any) => a.id === DEFAULT_ACTOR.id)) {
+        merged.unshift({ ...DEFAULT_ACTOR });
+      }
+      setActors(merged);
     } catch (e: any) {
       setError(e.message);
     } finally {
