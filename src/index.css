@@ -919,10 +919,11 @@ tbody td {
     font-size: 1.15rem;
   }
 
-  /* Stat grid: 2 columns */
+  /* Stat grid: 2 columns, tighter */
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
   /* Status breakdown: 2 columns */
@@ -931,21 +932,50 @@ tbody td {
   }
 
   .stat-card {
-    padding: 14px;
+    padding: 12px;
+  }
+
+  .stat-icon {
+    display: none;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    margin-bottom: 6px;
   }
 
   .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
   /* Dashboard grid: single column */
   .dash-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
-  /* Kanban columns smaller */
+  .dash-section-title {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  /* Kanban: scroll horizontally */
+  .kanban {
+    gap: 10px;
+  }
   .kanban-col {
-    min-width: 160px;
+    min-width: 140px;
+  }
+  .kanban-col-header {
+    padding: 8px 10px;
+  }
+  .kanban-cards {
+    padding: 6px;
+    gap: 6px;
+  }
+  .kanban-card {
+    padding: 8px;
+    font-size: 12px;
   }
 
   /* Filter bar: stack */
