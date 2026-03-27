@@ -119,6 +119,9 @@ export default function Import() {
   const [importing, setImporting] = useState<string | null>(null);
   const [results, setResults] = useState<any>(null);
   const [runMsg, setRunMsg] = useState<any>(null);
+  const [showRunForm, setShowRunForm] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [maxResults, setMaxResults] = useState(50);
 
   const token = localStorage.getItem('apify_token');
 
