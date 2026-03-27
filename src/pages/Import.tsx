@@ -12,6 +12,12 @@ function relTime(str?: string) {
   return new Date(str).toLocaleDateString();
 }
 
+const DEFAULT_ACTOR = {
+  id: "compass/crawler-google-places",
+  name: "Google Maps Scraper",
+  stats: { totalRuns: null, lastRunStartedAt: null },
+};
+
 function ActorCard({ actor, onRun, onImport, importing }: any) {
   const isRunning = actor.stats?.lastRunStatus === 'RUNNING' ||
     (actor.lastRun && actor.lastRun.status === 'RUNNING');
@@ -79,7 +85,11 @@ export default function Import() {
     setError(null);
     try {
       const list = await api.apify.actors();
-      setActors(list || []);
+      const merged = list || [];
+      if (!merged.find((a: any) => a.id === DEFAULT_ACTOR.id)) {
+        merged.unshift({ ...DEFAULT_ACTOR });
+      }
+      setActors(merged);
     } catch (e: any) {
       setError(e.message);
     } finally {
