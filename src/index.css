@@ -908,6 +908,7 @@ tbody td {
   /* Reduce page padding */
   .page {
     padding: 16px;
+    overflow-x: hidden;
   }
 
   .page-header {
