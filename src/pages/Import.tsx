@@ -12,6 +12,12 @@ function relTime(str?: string) {
   return new Date(str).toLocaleDateString();
 }
 
+const DEFAULT_ACTOR = {
+  id: "compass/crawler-google-places",
+  name: "Google Maps Scraper",
+  stats: { totalRuns: null, lastRunStartedAt: null },
+};
+
 function ActorCard({ actor, onRun, onImport, importing }: any) {
   const isRunning = actor.stats?.lastRunStatus === 'RUNNING' ||
     (actor.lastRun && actor.lastRun.status === 'RUNNING');
