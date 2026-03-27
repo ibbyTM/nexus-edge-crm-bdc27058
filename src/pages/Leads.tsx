@@ -162,14 +162,14 @@ export default function Leads() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select className="input" value={status} onChange={(e) => setStatus(e.target.value)} style={{ width: 'auto' }}>
+        <select className="input" value={status} onChange={(e) => setStatus(e.target.value)}>
           {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
         </select>
-        <select className="input" value={city} onChange={(e) => setCity(e.target.value)} style={{ width: 'auto' }}>
+        <select className="input" value={city} onChange={(e) => setCity(e.target.value)}>
           <option value="all">All Cities</option>
           {cities.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select className="input" value={industry} onChange={(e) => setIndustry(e.target.value)} style={{ width: 'auto' }}>
+        <select className="input" value={industry} onChange={(e) => setIndustry(e.target.value)}>
           <option value="all">All Industries</option>
           {industries.map(i => <option key={i} value={i}>{i}</option>)}
         </select>
@@ -187,7 +187,7 @@ export default function Leads() {
       )}
 
       {/* Keyboard hint */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 12, fontSize: 11, color: 'var(--muted)' }}>
+      <div className="keyboard-hints" style={{ display: 'flex', gap: 12, marginBottom: 12, fontSize: 11, color: 'var(--muted)' }}>
         <span><span className="kbd">Space</span> Mark called</span>
         <span><span className="kbd">Enter</span> Next lead</span>
         <span><span className="kbd">Esc</span> Close panel</span>

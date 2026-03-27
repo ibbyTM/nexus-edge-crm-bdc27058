@@ -925,9 +925,13 @@ tbody td {
     gap: 10px;
   }
 
-  /* Status breakdown: 3 columns */
+  /* Status breakdown: 2 columns */
   .status-breakdown-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .stat-card {
+    padding: 14px;
   }
 
   .stat-value {
@@ -950,7 +954,7 @@ tbody td {
     align-items: stretch;
   }
   .filter-bar .input {
-    width: 100%;
+    width: 100% !important;
   }
   .search-input {
     min-width: unset;
@@ -958,14 +962,36 @@ tbody td {
   }
 
   /* Hide keyboard hints */
-  .kbd {
+  .keyboard-hints {
     display: none;
   }
 
-  /* Table: hide less important columns */
-  table th:nth-child(n+6),
-  table td:nth-child(n+6) {
+  /* Table: hide City(4), Industry(5), Calls(7), Last Called(8), Rating(9) — keep checkbox(1), company(2), phone(3), status(6), actions(10) */
+  table th:nth-child(4),
+  table td:nth-child(4),
+  table th:nth-child(5),
+  table td:nth-child(5),
+  table th:nth-child(7),
+  table td:nth-child(7),
+  table th:nth-child(8),
+  table td:nth-child(8),
+  table th:nth-child(9),
+  table td:nth-child(9) {
     display: none;
+  }
+
+  /* Page header tighter */
+  .page-header {
+    margin-bottom: 12px;
+  }
+  .page-header .btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  /* Panel info values */
+  .info-value {
+    max-width: 55%;
   }
 
   /* Lead detail panel: full screen */
