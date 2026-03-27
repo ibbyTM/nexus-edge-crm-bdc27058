@@ -1,61 +1,57 @@
 
 
-# Plan: Migrate Nexus Edge CRM to Lovable
+# Mobile-Friendly Nexus Edge CRM
 
-## What Your App Has
+## Problem
+The app has no mobile responsiveness. On a 393px screen:
+- The 248px sidebar eats 63% of the width, leaving ~145px for content
+- The leads table is unusable (10 columns, no horizontal scroll affordance)
+- The lead detail panel is 440px wide (wider than the screen)
+- Dashboard stat grids and kanban overflow
+- Filter bar dropdowns stack poorly
+- No way to collapse the sidebar
 
-- **Frontend**: React 18 + Vite, 4 pages (Dashboard, Leads, Import, Scripts), 6 components, plain CSS (822 lines), react-router-dom
-- **Backend**: Express API with 3 route files (leads, stats, apify), SQLite database with `leads` and `call_log` tables, Apify integration
+## Approach
+Keep the existing dark, professional aesthetic. No Tailwind refactoring — all changes stay in the existing plain CSS system. Add a collapsible sidebar on mobile with a hamburger toggle, and targeted `@media` queries for small screens.
 
-## The Problem
+## Changes
 
-Lovable cannot run a persistent Node.js server or SQLite database. The backend must be replaced with **Lovable Cloud** (Supabase): Postgres database + Edge Functions.
+### 1. Layout.tsx — Collapsible mobile sidebar
+- Add a hamburger menu button visible only on mobile (top-left)
+- Sidebar becomes an overlay drawer on screens < 768px
+- Tapping a nav link auto-closes the sidebar
+- Add a backdrop overlay when sidebar is open
 
-## Migration Plan
+### 2. index.css — Mobile media queries
+Add a `@media (max-width: 768px)` block covering:
 
-### Step 1 — Database (Supabase)
+**Layout:**
+- Sidebar: `position: fixed`, `transform: translateX(-100%)` by default, slides in when open
+- Main content: full width, no sidebar offset
+- Page padding: reduce from 28px 32px to 16px
 
-Create two tables mirroring your SQLite schema:
+**Dashboard:**
+- Stat grid: 2 columns (already has this at 1200px, add for smaller)
+- Status breakdown grid: 3 columns instead of 6
+- Kanban: horizontal scroll stays, reduce min-width per column
 
-- **leads**: id, company_name, phone, website, city, postcode, industry, status (enum: new/called/interested/demo_booked/closed/dead), source, rating, review_count, notes, last_called_at, call_count, created_at, updated_at
-- **call_log**: id, lead_id (FK to leads), outcome, notes, created_at
+**Leads page:**
+- Filter bar: stack vertically, search input full-width
+- Hide keyboard shortcuts hint on mobile
+- Table: ensure horizontal scroll works, hide less important columns (Rating, Last Called, Calls) via CSS
+- Bulk action bar: wrap properly
 
-### Step 2 — Backend API (Edge Functions)
+**Lead detail panel:**
+- Panel width: 100vw instead of 440px (full-screen takeover)
 
-Replicate your 3 Express route files as Supabase Edge Functions:
+**Import page:**
+- Actor grid: single column
 
-- **leads**: list with filters/search/pagination, create, update, delete, get calls, import, bulk update
-- **stats**: total leads, called today, demos booked, conversion rate, status breakdown, recent activity
-- **apify**: proxy to Apify API (actors list, run actor, get last run, get runs) — uses your Apify token passed via header
+**Modal:**
+- Already has `max-width: 96vw` — good
 
-### Step 3 — Frontend Integration
+### 3. Dashboard.tsx — Minor tweak
+- Status breakdown grid: add a CSS class instead of inline `gridTemplateColumns` so media query can override it
 
-Port your frontend code into this Lovable project:
-- Bring in all 4 pages (Dashboard, Leads, Import, Scripts) and 6 components as JSX files
-- Bring in the full 822-line index.css
-- Replace the `api.js` fetch wrapper to call Supabase Edge Functions instead of `/api/*`
-- Update routing in App.tsx to include all 4 routes with the Layout wrapper
-
-### Step 4 — Scripts Page (No Backend Needed)
-
-The Scripts page is purely static content (cold call scripts) — it ports directly with zero changes.
-
-## What Stays the Same
-
-- All UI components and styling (pixel-perfect match)
-- All page logic and interactions (kanban, lead detail panel, filters, etc.)
-- Apify integration (just proxied through Edge Functions instead of Express)
-- localStorage-based Apify token storage
-
-## What Changes
-
-- SQLite queries become Postgres/Supabase queries
-- Express routes become Supabase Edge Functions
-- `fetch('/api/...')` becomes `fetch('SUPABASE_URL/functions/v1/...')`
-
-## Technical Details
-
-- Frontend files will be converted from `.jsx` to `.tsx` (or kept as `.jsx` with TypeScript config allowing JS)
-- The existing Lovable project's Tailwind setup won't conflict — your app uses plain CSS variables
-- Supabase RLS policies will be set to allow all operations (matching your current setup with no auth)
-
+## Files modified
+- `src/components/Layout.tsx` — hamburger toggle, sidebar state, backdrop, auto-close on nav
