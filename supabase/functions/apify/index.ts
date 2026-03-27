@@ -17,6 +17,10 @@ function getToken(req: Request): string {
   return token;
 }
 
+function toApifyId(id: string) {
+  return id.replace("/", "~");
+}
+
 async function apifyFetch(token: string, path: string) {
   const res = await fetch(`https://api.apify.com/v2${path}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -44,7 +48,7 @@ Deno.serve(async (req) => {
     }
 
     if (actorsMatch && actorsMatch[1] && actorsMatch[2]) {
-      const actorId = actorsMatch[1];
+      const actorId = toApifyId(actorsMatch[1]);
       const action = actorsMatch[2];
 
       // POST /apify/actors/:actorId/run
