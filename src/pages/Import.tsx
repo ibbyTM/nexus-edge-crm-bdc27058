@@ -187,7 +187,17 @@ export default function Import() {
         setResults({ type: 'warn', msg: 'Last run returned 0 items.' });
         return;
       }
-      const r = await api.leads.import(items);
+      const trimmed = items.map((i: any) => ({
+        title: i.title,
+        phone: i.phone || i.phoneUnformatted,
+        website: i.website || i.url,
+        city: i.city,
+        address: i.address,
+        categoryName: i.categoryName,
+        rating: i.totalScore,
+        reviewsCount: i.reviewsCount,
+      }));
+      const r = await api.leads.import(trimmed);
       setResults({ type: 'success', ...r });
     } catch (e: any) {
       setResults({ type: 'error', msg: e.message });
