@@ -31,11 +31,29 @@ const nav = [
 
 export default function Layout() {
   const [showSettings, setShowSettings] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const token = localStorage.getItem('apify_token');
+  const location = useLocation();
+
+  const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      {/* Mobile header bar */}
+      <div className="mobile-header">
+        <button className="mobile-menu-btn" onClick={() => setIsSidebarOpen(true)} aria-label="Open menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div className="mobile-header-title">
+          <div className="sidebar-logo-icon" style={{ width: 24, height: 24, fontSize: 11 }}>⚡</div>
+          Nexus Edge
+        </div>
+      </div>
+
+      {/* Sidebar backdrop (mobile) */}
+      {isSidebarOpen && <div className="sidebar-backdrop" onClick={closeSidebar} />}
+
+      <aside className={`sidebar${isSidebarOpen ? ' open' : ''}`}>
         <div className="sidebar-logo">
           <div className="sidebar-logo-mark">
             <div className="sidebar-logo-icon">⚡</div>
@@ -52,6 +70,7 @@ export default function Layout() {
               to={item.to}
               end={item.exact}
               className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+              onClick={closeSidebar}
             >
               <span className="nav-icon">{item.icon}</span>
               {item.label}
@@ -62,7 +81,7 @@ export default function Layout() {
         <div className="sidebar-footer">
           <div
             className="sidebar-token-status"
-            onClick={() => setShowSettings(true)}
+            onClick={() => { setShowSettings(true); closeSidebar(); }}
           >
             <span className={token ? 'pulse-dot' : 'pulse-dot-idle'} />
             <span>{token ? 'Apify Connected' : 'Apify Not Set'}</span>
