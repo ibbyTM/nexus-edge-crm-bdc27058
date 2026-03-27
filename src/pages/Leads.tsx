@@ -187,7 +187,7 @@ export default function Leads() {
       )}
 
       {/* Keyboard hint */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 12, fontSize: 11, color: 'var(--muted)' }}>
+      <div className="keyboard-hints" style={{ display: 'flex', gap: 12, marginBottom: 12, fontSize: 11, color: 'var(--muted)' }}>
         <span><span className="kbd">Space</span> Mark called</span>
         <span><span className="kbd">Enter</span> Next lead</span>
         <span><span className="kbd">Esc</span> Close panel</span>
