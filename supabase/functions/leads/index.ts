@@ -56,8 +56,10 @@ Deno.serve(async (req) => {
       if (!Array.isArray(raw) || raw.length === 0)
         return json({ error: "No leads provided" }, 400);
 
-      let imported = 0;
+      // Build rows, dedup by phone
+      const rows: any[] = [];
       let skipped = 0;
+      const seenPhones = new Set<string>();
 
       for (const item of raw) {
         const name = item.title || item.company_name || item.name || "";
@@ -65,12 +67,8 @@ Deno.serve(async (req) => {
 
         const phone = item.phone || item.phoneUnformatted || null;
         if (phone) {
-          const { data: existing } = await supabase
-            .from("leads")
-            .select("id")
-            .eq("phone", phone)
-            .limit(1);
-          if (existing && existing.length > 0) { skipped++; continue; }
+          if (seenPhones.has(phone)) { skipped++; continue; }
+          seenPhones.add(phone);
         }
 
         let city = item.city || "";
@@ -79,7 +77,7 @@ Deno.serve(async (req) => {
           if (parts.length >= 2) city = parts[parts.length - 2].trim();
         }
 
-        const { error } = await supabase.from("leads").insert({
+        rows.push({
           company_name: name,
           phone,
           website: item.website || item.url || null,
@@ -89,8 +87,33 @@ Deno.serve(async (req) => {
           review_count: item.reviewsCount || item.review_count || null,
           source: "apify",
         });
-        if (!error) imported++;
-        else skipped++;
+      }
+
+      // Filter out existing phones in one query
+      if (seenPhones.size > 0) {
+        const { data: existing } = await supabase
+          .from("leads")
+          .select("phone")
+          .in("phone", Array.from(seenPhones));
+        if (existing) {
+          const existingPhones = new Set(existing.map((e: any) => e.phone));
+          const before = rows.length;
+          const filtered = rows.filter(r => !r.phone || !existingPhones.has(r.phone));
+          skipped += before - filtered.length;
+          rows.length = 0;
+          rows.push(...filtered);
+        }
+      }
+
+      if (rows.length === 0) return json({ imported: 0, skipped, total: raw.length });
+
+      // Batch insert in chunks of 100
+      let imported = 0;
+      for (let i = 0; i < rows.length; i += 100) {
+        const chunk = rows.slice(i, i + 100);
+        const { error } = await supabase.from("leads").insert(chunk);
+        if (!error) imported += chunk.length;
+        else skipped += chunk.length;
       }
 
       return json({ imported, skipped, total: raw.length });
