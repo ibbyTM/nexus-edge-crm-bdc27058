@@ -52,7 +52,10 @@ Deno.serve(async (req) => {
 
     // POST /leads/import
     if (req.method === "POST" && pathParts[0] === "import") {
-      const { leads: raw } = await req.json();
+      console.log("Import endpoint hit");
+      const body = await req.json();
+      const raw = body.leads;
+      console.log("Received leads count:", Array.isArray(raw) ? raw.length : "not array");
       if (!Array.isArray(raw) || raw.length === 0)
         return json({ error: "No leads provided" }, 400);
 
