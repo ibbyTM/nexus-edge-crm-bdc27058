@@ -124,7 +124,7 @@ export default function Dashboard() {
       {/* Bottom: Status breakdown */}
       <div style={{ marginTop: 24 }}>
         <div className="dash-section-title">Status Breakdown</div>
-        <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
+        <div className="stat-grid status-breakdown-grid">
           {[
             { key: 'new', label: 'New', color: 'var(--s-new)' },
             { key: 'called', label: 'Called', color: 'var(--s-called)' },
