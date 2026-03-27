@@ -925,9 +925,13 @@ tbody td {
     gap: 10px;
   }
 
-  /* Status breakdown: 3 columns */
+  /* Status breakdown: 2 columns */
   .status-breakdown-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .stat-card {
+    padding: 14px;
   }
 
   .stat-value {
