@@ -17,6 +17,10 @@ function getToken(req: Request): string {
   return token;
 }
 
+function toApifyId(id: string) {
+  return id.replace("/", "~");
+}
+
 async function apifyFetch(token: string, path: string) {
   const res = await fetch(`https://api.apify.com/v2${path}`, {
     headers: { Authorization: `Bearer ${token}` },
